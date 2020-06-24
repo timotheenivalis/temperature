@@ -70,3 +70,30 @@ Wide_To_Long_Temperature <- function(dat, id.vars="Year",
                    value.name = value.name)
   return(melttemp)
 }
+
+
+#' Plot trend
+#'
+#' Plot trend
+#'
+#' @param dat x
+#'
+#' @examples
+#' data(tuggeranong)
+#' plot_trend(tuggeranong)
+#'
+#' @export
+plot_trend <- function(dat){
+  melttemp <- Wide_To_Long_Temperature(dat)
+
+  model <- summary(stats::lm(Temperature ~ Year + Month, data = melttemp))
+  year_effect <- round(model$coefficients["Year",],3)
+
+  ggplot2::ggplot(data=melttemp,
+                  ggplot2::aes(x=melttemp$Year,y=melttemp$Temperature, color=melttemp$Month))+
+    ggplot2::geom_point() + ggplot2::geom_smooth(alpha=0.2) +
+    ggplot2::annotate("label", x = mean(melttemp$Year),
+             y = max(melttemp$Temperature),
+             label = paste0(ifelse(year_effect[1]>=0, "+", "-"),
+                            year_effect[1], "\u2103 /year, p=",year_effect[4]))
+}
